@@ -47,7 +47,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/admin/stats')
+    fetch('https://gift-card-marketplace.onrender.com/api/admin/stats')
       .then((res) => res.json())
       .then((resData) => {
         setData(resData);

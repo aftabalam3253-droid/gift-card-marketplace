@@ -11,7 +11,7 @@ export default function VerificationCenter() {
   const [copied, setCopied] = useState(false);
 
   const fetchQueue = () => {
-    fetch('http://localhost:5000/api/admin/verification-queue')
+    fetch('https://gift-card-marketplace.onrender.com/api/admin/verification-queue')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setCards(data);
@@ -29,7 +29,7 @@ export default function VerificationCenter() {
 
   const handleAction = async (cardId: number, status: string, reason?: string) => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/update-status', {
+      const res = await fetch('https://gift-card-marketplace.onrender.com/api/admin/update-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId, status, reason }),

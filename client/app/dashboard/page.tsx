@@ -24,8 +24,8 @@ export default function DashboardPage() {
 
     // Fetch user's purchased & listed cards
     Promise.all([
-      fetch(`http://localhost:5000/api/cards/my-purchases/${userData.id}`).then((res) => res.json()),
-      fetch(`http://localhost:5000/api/cards/my-listings/${userData.id}`).then((res) => res.json()),
+      fetch(`https://gift-card-marketplace.onrender.com/api/cards/my-purchases/${userData.id}`).then((res) => res.json()),
+      fetch(`https://gift-card-marketplace.onrender.com/api/cards/my-listings/${userData.id}`).then((res) => res.json()),
     ])
       .then(([purchases, listings]) => {
         if (Array.isArray(purchases)) setPurchasedCards(purchases);

@@ -19,7 +19,7 @@ export default function Home() {
   const pathname = usePathname();
 
   const fetchCards = () => {
-    fetch('http://localhost:5000/api/cards')
+    fetch('https://gift-card-marketplace.onrender.com/api/cards')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -61,7 +61,7 @@ export default function Home() {
     setBuying(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/cards/buy', {
+      const response = await fetch('https://gift-card-marketplace.onrender.com/api/cards/buy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

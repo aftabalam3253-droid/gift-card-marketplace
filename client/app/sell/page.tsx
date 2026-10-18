@@ -25,7 +25,7 @@ export default function SellPage() {
 
   // Fetch brands from database
   useEffect(() => {
-    fetch('http://localhost:5000/api/cards/brands')
+    fetch('https://gift-card-marketplace.onrender.com/api/cards/brands')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setDbBrands(data);
@@ -67,7 +67,7 @@ export default function SellPage() {
     const user = storedUser ? JSON.parse(storedUser) : null;
 
     try {
-      const response = await fetch('http://localhost:5000/api/cards/create', {
+      const response = await fetch('https://gift-card-marketplace.onrender.com/api/cards/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -83,7 +83,7 @@ export default function SellPage() {
         setSearchTerm('');
         
         // Refresh brand list in background
-        fetch('http://localhost:5000/api/cards/brands')
+        fetch('https://gift-card-marketplace.onrender.com/api/cards/brands')
           .then((res) => res.json())
           .then((data) => Array.isArray(data) && setDbBrands(data));
       } else {
