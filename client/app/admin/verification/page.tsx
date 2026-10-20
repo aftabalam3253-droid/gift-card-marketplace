@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Eye, Lock, ExternalLink, Check } from 'lucide-react';
 
@@ -29,10 +30,10 @@ export default function VerificationCenter() {
 
   const handleAction = async (cardId: number, status: string, reason?: string) => {
     try {
-      const res = await fetch('https://gift-card-marketplace.onrender.com/api/admin/update-status', {
-        method: 'POST',
+      const res = await fetch(`https://gift-card-marketplace.onrender.com/api/admin/sell-requests/${cardId}/status`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cardId, status, reason }),
+        body: JSON.stringify({ status, reason }),
       });
       if (res.ok) {
         setSelectedCard(null);
@@ -225,7 +226,7 @@ export default function VerificationCenter() {
                     Back
                   </button>
                   <button
-                    onClick={() => handleAction(selectedCard.id, 'REJECTED', rejectReason)}
+                    onClick={() => handleAction(selectedCard.id, 'rejected', rejectReason)}
                     className="px-3 py-1.5 bg-rose-600 text-white font-bold text-xs rounded-xl hover:bg-rose-700"
                   >
                     Confirm Rejection
@@ -241,7 +242,7 @@ export default function VerificationCenter() {
                   <XCircle className="w-4 h-4" /> Reject Card
                 </button>
                 <button
-                  onClick={() => handleAction(selectedCard.id, 'VERIFIED')}
+                  onClick={() => handleAction(selectedCard.id, 'verified')}
                   className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Verify & Approve
