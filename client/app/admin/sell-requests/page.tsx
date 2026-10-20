@@ -58,41 +58,50 @@ export default function SellRequestsPage() {
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-semibold text-[11px]">
                 <th className="p-4">#ID</th>
-                <th className="p-4">Brand / Title</th>
+                <th className="p-4">Brand</th>
                 <th className="p-4">Seller Details</th>
-                <th className="p-4">Value / Price</th>
+                <th className="p-4">Card Balance</th>
+                <th className="p-4">Selling Price</th>
                 <th className="p-4">Submitted Date</th>
                 <th className="p-4">Status</th>
-                <th className="p-4 text-right">Actions / Badge</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">Loading sell requests ledger...</td>
+                  <td colSpan={8} className="text-center py-8 text-slate-400">Loading requests...</td>
                 </tr>
               ) : requests.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">No sell requests found.</td>
+                  <td colSpan={8} className="text-center py-8 text-slate-400">No sell requests found.</td>
                 </tr>
               ) : (
                 requests.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/50">
+                    {/* 1. ID */}
                     <td className="p-4 font-mono text-[11px] font-bold">#LS{item.id}</td>
-                    <td className="p-4">
-                      <span className="font-bold text-slate-900 block">{item.brand}</span>
-                      <span className="text-[10px] text-slate-400">{item.title}</span>
-                    </td>
+                    
+                    {/* 2. Brand */}
+                    <td className="p-4 font-bold text-slate-900">{item.brand}</td>
+                    
+                    {/* 3. Seller Details */}
                     <td className="p-4">
                       <div className="flex items-center gap-1.5 text-slate-800 font-bold">
                         <User className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                        <span className="truncate max-w-[160px]">{item.seller_email || `User #${item.seller_id}`}</span>
+                        <span className="truncate max-w-[160px]">
+                          {item.seller_email || (item.seller_id ? `User #${item.seller_id}` : 'N/A')}
+                        </span>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <span className="block text-slate-900 font-bold">Face: ₹{item.balance}</span>
-                      <span className="block text-emerald-600 font-bold">Offer: ₹{item.price}</span>
-                    </td>
+                    
+                    {/* 4. Card Balance */}
+                    <td className="p-4 font-bold text-slate-800">₹{item.balance}</td>
+                    
+                    {/* 5. Selling Price */}
+                    <td className="p-4 font-bold text-indigo-600">₹{item.price}</td>
+                    
+                    {/* 6. Submitted Date */}
                     <td className="p-4 text-slate-500 font-medium">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -107,6 +116,8 @@ export default function SellRequestsPage() {
                         </span>
                       </div>
                     </td>
+                    
+                    {/* 7. Status Badge */}
                     <td className="p-4">
                       {item.status && item.status.toLowerCase() === 'verified' ? (
                         <span className="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full font-bold text-[10px] inline-flex items-center gap-1">
@@ -122,6 +133,8 @@ export default function SellRequestsPage() {
                         </span>
                       )}
                     </td>
+                    
+                    {/* 8. Actions */}
                     <td className="p-4 text-right">
                       {item.status && item.status.toLowerCase() === 'verified' ? (
                         <span className="inline-flex items-center gap-1 text-emerald-600 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
