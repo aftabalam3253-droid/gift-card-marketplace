@@ -1,207 +1,202 @@
+
 'use client';
-import { useEffect, useState } from 'react';
-import { 
-  ShieldCheck, Eye, EyeOff, CheckCircle2, 
-  XCircle, X 
-} from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, CheckCircle2, XCircle, Eye, Copy, ExternalLink, AlertCircle } from 'lucide-react';
+
+interface GiftCard {
+  id: number;
+  title: string;
+  brand: string;
+  card_number: string;
+  pin: string;
+  balance: number;
+  price: number;
+  status: string;
+  seller_id: number;
+  created_at: string;
+}
 
 export default function VerificationCenter() {
-  const [queue, setQueue] = useState<any[]>([]);
+  const [cards, setCards] = useState<GiftCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCard, setSelectedCard] = useState<any | null>(null);
-  const [showCode, setShowCode] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<GiftCard | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchQueue = () => {
-    setLoading(true);
-    fetch('https://gift-card-marketplace.onrender.com/api/admin/verification-queue')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setQueue(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to load queue:', err);
-        setLoading(false);
-      });
+  // Fetch pending verification queue
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/verification-queue'); // Apne backend URL ke hisab se change karein
+      const data = await res.json();
+      setCards(data);
+    } catch (err) {
+      console.error('Error fetching verification queue:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchQueue();
   }, []);
 
-  const handleAction = async (status: 'verified' | 'rejected') => {
-    if (!selectedCard) return;
-    setIsSubmitting(true);
+  // Handle Status Update (Verify or Reject)
+  const handleStatusUpdate = async (id: number, status: 'verified' | 'rejected') => {
     try {
-      const res = await fetch(`https://gift-card-marketplace.onrender.com/api/admin/sell-requests/${selectedCard.id}/status`, {
+      setActionLoading(true);
+      const res = await fetch(`http://localhost:5000/api/admin/sell-requests/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, rejection_reason: rejectReason }),
+        body: JSON.stringify({ status }),
       });
 
       if (res.ok) {
+        setCards(cards.filter(card => card.id !== id));
+        setIsModalOpen(false);
         setSelectedCard(null);
-        setRejectReason('');
-        setShowCode(false);
-        fetchQueue();
       } else {
         alert('Failed to update status');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error updating status:', err);
     } finally {
-      setIsSubmitting(false);
+      setActionLoading(false);
     }
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
+  };
+
   return (
-    <div className="space-y-6 font-sans text-slate-800">
-      <div className="flex justify-between items-center">
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Verification Center</h1>
-            <span className="bg-amber-100 text-amber-800 text-xs font-black px-2.5 py-0.5 rounded-full">
-              {queue.length} Pending
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1 font-medium">
-            Inspect secrets, verify balance, and confirm listing validity.
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <ShieldCheck className="text-indigo-600" /> Verification Center
+          </h1>
+          <p className="text-sm text-gray-500">Inspect secrets, verify balance, and confirm listing validity.</p>
         </div>
+        <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">
+          {cards.length} Pending
+        </span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-semibold text-[11px] uppercase tracking-wider">
-                <th className="p-4">Card ID</th>
-                <th className="p-4">Brand</th>
-                <th className="p-4">Face Value</th>
-                <th className="p-4">Asking Price</th>
-                <th className="p-4">Seller</th>
-                <th className="p-4 text-right">Inspection</th>
+      {loading ? (
+        <p className="text-gray-500">Loading verification queue...</p>
+      ) : cards.length === 0 ? (
+        <div className="bg-white p-8 rounded-xl shadow-sm text-center border border-gray-100">
+          <CheckCircle2 className="mx-auto h-12 w-12 text-green-500 mb-2" />
+          <h3 className="text-lg font-medium text-gray-900">All caught up!</h3>
+          <p className="text-sm text-gray-500">No pending gift cards require verification right now.</p>
+        </div>
+      ) : (
+        <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-100">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Card ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Face Value</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Asking Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seller ID</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Inspection</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-400">Loading queue...</td>
-                </tr>
-              ) : queue.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-400">
-                    <ShieldCheck className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-                    <p className="font-bold text-slate-700">No pending cards found for verification!</p>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {cards.map((card) => (
+                <tr key={card.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LS{card.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{card.brand}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">₹{card.balance}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">₹{card.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">User #{card.seller_id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => { setSelectedCard(card); setIsModalOpen(true); }}
+                      className="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700 transition"
+                    >
+                      <Eye size={14} /> Inspect Card
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                queue.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/70 transition">
-                    <td className="p-4 font-mono font-bold text-slate-900">#LS{item.id}</td>
-                    <td className="p-4 font-bold text-slate-900">{item.brand}</td>
-                    <td className="p-4 font-bold text-slate-900">₹{item.balance}</td>
-                    <td className="p-4 font-bold text-indigo-600">₹{item.price}</td>
-                    <td className="p-4 text-slate-500">{item.seller_email || 'User'}</td>
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={() => setSelectedCard(item)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs shadow-sm transition flex items-center gap-1.5 ml-auto"
-                      >
-                        <Eye className="w-3.5 h-3.5" /> Inspect Card
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
-      {/* INSPECTION MODAL */}
-      {selectedCard && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex justify-end">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
-            <div>
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div>
-                  <h2 className="text-lg font-black text-slate-900">Card Verification #LS{selectedCard.id}</h2>
-                  <p className="text-xs text-slate-400 font-medium">{selectedCard.brand}</p>
-                </div>
-                <button onClick={() => setSelectedCard(null)} className="p-1.5 text-slate-400 hover:text-slate-600">
-                  <X className="w-5 h-5" />
-                </button>
+      {/* Inspection Modal */}
+      {isModalOpen && selectedCard && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Inspect Gift Card</h3>
+            <p className="text-xs text-gray-500 mb-4">Review card credentials securely before making a decision.</p>
+
+            <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Brand:</span>
+                <span className="font-semibold text-gray-900">{selectedCard.brand}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Face Value (Balance):</span>
+                <span className="font-semibold text-gray-900">₹{selectedCard.balance}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Asking Selling Price:</span>
+                <span className="font-semibold text-indigo-600">₹{selectedCard.price}</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 my-5">
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Balance</p>
-                  <p className="text-base font-black text-slate-900">₹{selectedCard.balance}</p>
-                </div>
-                <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
-                  <p className="text-[10px] text-indigo-500 font-bold uppercase">Price</p>
-                  <p className="text-base font-black text-indigo-600">₹{selectedCard.price}</p>
-                </div>
-              </div>
+              <hr className="border-gray-200" />
 
-              <div className="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-inner my-5">
-                <div className="flex justify-between items-center">
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">Voucher Credentials</p>
-                  <button 
-                    onClick={() => setShowCode(!showCode)}
-                    className="text-xs font-bold text-indigo-400 flex items-center gap-1"
-                  >
-                    {showCode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    {showCode ? 'Hide' : 'Reveal'}
+              <div>
+                <label className="text-xs font-medium text-gray-500 block mb-1">Card Number / Code:</label>
+                <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-300 font-mono text-sm">
+                  <span>{selectedCard.card_number}</span>
+                  <button onClick={() => copyToClipboard(selectedCard.card_number)} className="text-indigo-600 hover:text-indigo-800 text-xs flex items-center gap-1">
+                    <Copy size={14} /> Copy
                   </button>
                 </div>
-                <div>
-                  <p className="text-[10px] text-slate-400">Card Number</p>
-                  <p className="font-mono text-sm font-bold tracking-wider text-emerald-400 mt-0.5">
-                    {showCode ? selectedCard.card_number : '•••• •••• ••••'}
-                  </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-500 block mb-1">PIN / Password:</label>
+                <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-300 font-mono text-sm">
+                  <span>{selectedCard.pin || 'N/A'}</span>
+                  {selectedCard.pin && (
+                    <button onClick={() => copyToClipboard(selectedCard.pin)} className="text-indigo-600 hover:text-indigo-800 text-xs flex items-center gap-1">
+                      <Copy size={14} /> Copy
+                    </button>
+                  )}
                 </div>
-                {selectedCard.pin && (
-                  <div>
-                    <p className="text-[10px] text-slate-400">PIN</p>
-                    <p className="font-mono text-xs font-bold text-amber-400 mt-0.5">
-                      {showCode ? selectedCard.pin : '••••'}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-1.5 mt-4">
-                <label className="text-xs font-bold text-slate-700">Rejection Reason (If Rejecting)</label>
-                <textarea
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="e.g. Invalid PIN or already used"
-                  className="w-full border border-slate-200 p-2.5 rounded-xl text-xs focus:outline-none focus:border-indigo-600 font-medium"
-                  rows={2}
-                />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
+            <div className="mt-6 flex justify-end gap-3">
               <button
-                disabled={isSubmitting}
-                onClick={() => handleAction('rejected')}
-                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5"
+                disabled={actionLoading}
+                onClick={() => handleStatusUpdate(selectedCard.id, 'rejected')}
+                className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-medium rounded-xl text-sm transition flex items-center gap-1.5"
               >
-                <XCircle className="w-4 h-4" /> Reject
+                <XCircle size={16} /> Reject Card
               </button>
               <button
-                disabled={isSubmitting}
-                onClick={() => handleAction('verified')}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                disabled={actionLoading}
+                onClick={() => handleStatusUpdate(selectedCard.id, 'verified')}
+                className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 font-medium rounded-xl text-sm transition flex items-center gap-1.5 shadow-sm"
               >
-                <CheckCircle2 className="w-4 h-4" /> Approve
+                <CheckCircle2 size={16} /> Verify & Live
               </button>
             </div>
+
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg font-bold"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
