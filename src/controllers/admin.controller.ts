@@ -72,3 +72,40 @@ export const updateCardStatus = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ message: err.message });
   }
 };
+// 1. Get all pending/all sell requests
+export const getSellRequests = async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM gift_cards ORDER BY created_at DESC"
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Error fetching sell requests:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// 2. Update Sell Request Status (Verify or Reject)
+export const updateSellRequestStatus = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { status } = req.body; // 'verified' ya 'rejected'
+
+  try {
+    const result = await pool.query(
+      "UPDATE gift_cards SET status = $1 WHERE id = $2 RETURNING *",
+      [status, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Sell request not found' });
+    }
+
+    res.status(200).json({ 
+      message: `Card status updated to ${status} successfully`, 
+      card: result.rows[0] 
+    });
+  } catch (err) {
+    console.error('Error updating status:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
