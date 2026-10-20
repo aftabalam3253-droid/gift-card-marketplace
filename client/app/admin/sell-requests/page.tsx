@@ -7,7 +7,7 @@ export default function SellRequestsPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchRequests = () => {
-    fetch('https://gift-card-marketplace.onrender.com/api/admin/sell-requests')
+    fetch(`https://gift-card-marketplace.onrender.com/api/admin/sell-requests?t=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -85,8 +85,8 @@ export default function SellRequestsPage() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-1.5 text-slate-800 font-bold">
-                        <User className="w-3.5 h-3.5 text-indigo-600" />
-                        {item.seller_email || `User #${item.seller_id}`}
+                        <User className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span className="truncate max-w-[160px]">{item.seller_email || `User #${item.seller_id}`}</span>
                       </div>
                     </td>
                     <td className="p-4">
@@ -95,8 +95,16 @@ export default function SellRequestsPage() {
                     </td>
                     <td className="p-4 text-slate-500 font-medium">
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        {item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>
+                          {item.created_at
+                            ? new Date(item.created_at).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                              })
+                            : 'N/A'}
+                        </span>
                       </div>
                     </td>
                     <td className="p-4">
