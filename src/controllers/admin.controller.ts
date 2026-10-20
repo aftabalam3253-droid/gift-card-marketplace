@@ -20,20 +20,22 @@ export const getVerificationQueue = async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`
       SELECT 
-        id,
-        title,
-        brand,
-        card_number,
-        pin,
-        balance,
-        price,
-        status,
-        seller_id,
-        created_at,
-        is_sold
-      FROM gift_cards
-      WHERE status IS NULL OR status = 'pending' OR status = 'available'
-      ORDER BY id DESC
+        gc.id,
+        gc.title,
+        gc.brand,
+        gc.card_number,
+        gc.pin,
+        gc.balance,
+        gc.price,
+        gc.status,
+        gc.seller_id,
+        gc.created_at,
+        gc.is_sold,
+        u.email as seller_email
+      FROM gift_cards gc
+      LEFT JOIN users u ON gc.seller_id = u.id
+      WHERE gc.status IS NULL OR gc.status = 'pending' OR gc.status = 'available'
+      ORDER BY gc.id DESC
     `);
     
     res.status(200).json(result.rows);

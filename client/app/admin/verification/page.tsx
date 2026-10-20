@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Eye, Lock, ExternalLink, Check } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Eye, Lock, ExternalLink, Check, User } from 'lucide-react';
 
 export default function VerificationCenter() {
   const [cards, setCards] = useState<any[]>([]);
@@ -47,13 +47,10 @@ export default function VerificationCenter() {
     }
   };
 
-  // Function to copy credentials and redirect to Flipkart
   const handleCheckAndRedirect = (cardNumber: string) => {
     navigator.clipboard.writeText(cardNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-
-    // Open Flipkart Gift Card Check page in new tab
     window.open('https://www.flipkart.com/account/giftcard', '_blank');
   };
 
@@ -87,6 +84,7 @@ export default function VerificationCenter() {
                   <th className="p-4">ID</th>
                   <th className="p-4">Brand</th>
                   <th className="p-4">Card Title</th>
+                  <th className="p-4">Seller</th>
                   <th className="p-4">Value / Selling Price</th>
                   <th className="p-4">Status</th>
                   <th className="p-4 text-right">Inspection</th>
@@ -106,6 +104,9 @@ export default function VerificationCenter() {
                             <AlertTriangle className="w-3 h-3" /> Suspicious
                           </span>
                         )}
+                      </td>
+                      <td className="p-4 font-bold text-slate-800">
+                        {card.seller_email || `User #${card.seller_id}`}
                       </td>
                       <td className="p-4">
                         <span className="block text-slate-900 font-bold">Face: ₹{card.balance}</span>
@@ -156,6 +157,12 @@ export default function VerificationCenter() {
               </button>
             </div>
 
+            {/* Seller Information */}
+            <div className="flex items-center gap-2 bg-indigo-50/60 border border-indigo-100 p-3 rounded-2xl text-xs font-bold text-indigo-900">
+              <User className="w-4 h-4 text-indigo-600" />
+              <span>Seller: {selectedCard.seller_email || `User ID: #${selectedCard.seller_id}`}</span>
+            </div>
+
             {/* Sensitive Credentials & Check Button */}
             <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-4">
               <div className="flex items-center justify-between text-slate-700 font-bold text-xs">
@@ -163,7 +170,6 @@ export default function VerificationCenter() {
                   <Lock className="w-4 h-4 text-indigo-600" /> Sensitive Credentials
                 </span>
 
-                {/* 🔍 CHECK & REDIRECT BUTTON */}
                 <button
                   onClick={() => handleCheckAndRedirect(selectedCard.card_number)}
                   className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-xl font-bold text-[11px] transition shadow-md flex items-center gap-1.5 cursor-pointer"
