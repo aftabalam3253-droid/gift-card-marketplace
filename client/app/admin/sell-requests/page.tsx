@@ -1,13 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ShieldCheck, XCircle, CheckCircle2, Clock, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { ShieldCheck, XCircle, CheckCircle2, Clock } from 'lucide-react';
 
 export default function SellRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch sell requests from backend
   const fetchRequests = () => {
     fetch('https://gift-card-marketplace.onrender.com/api/admin/sell-requests')
       .then((res) => res.json())
@@ -27,7 +25,6 @@ export default function SellRequestsPage() {
     fetchRequests();
   }, []);
 
-  // Handle Verify or Reject Action
   const handleStatusUpdate = async (id: number, newStatus: string) => {
     try {
       const response = await fetch(`https://gift-card-marketplace.onrender.com/api/admin/sell-requests/${id}/status`, {
@@ -37,7 +34,6 @@ export default function SellRequestsPage() {
       });
 
       if (response.ok) {
-        // Refresh list after successful update
         fetchRequests();
       } else {
         alert('Failed to update status');
@@ -63,9 +59,9 @@ export default function SellRequestsPage() {
               <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-semibold text-[11px]">
                 <th className="p-4">#ID</th>
                 <th className="p-4">Brand</th>
-                <th className="p-4">Card Value</th>
+                <th className="p-4">Card Balance</th>
                 <th className="p-4">Selling Price</th>
-                <th className="p-4">Code / PIN</th>
+                <th className="p-4">Card Number / PIN</th>
                 <th className="p-4">Status</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
@@ -83,11 +79,11 @@ export default function SellRequestsPage() {
                 requests.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/50">
                     <td className="p-4 font-mono text-[11px]">#LS{item.id}</td>
-                    <td className="p-4 font-bold text-slate-900">{item.brand_name || item.brand}</td>
-                    <td className="p-4">₹{item.card_value}</td>
-                    <td className="p-4 font-bold text-indigo-600">₹{item.selling_price}</td>
-                    <td className="p-4 font-mono text-xs bg-slate-100 px-2 py-1 rounded max-w-[120px] truncate">
-                      {item.card_code || 'N/A'}
+                    <td className="p-4 font-bold text-slate-900">{item.brand}</td>
+                    <td className="p-4 font-bold text-slate-800">₹{item.balance}</td>
+                    <td className="p-4 font-bold text-indigo-600">₹{item.price}</td>
+                    <td className="p-4 font-mono text-xs bg-slate-100 px-2 py-1 rounded max-w-[140px] truncate">
+                      {item.card_number || 'N/A'}
                     </td>
                     <td className="p-4">
                       {item.status === 'verified' ? (
