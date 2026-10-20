@@ -100,19 +100,31 @@ export default function SellRequestsPage() {
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-right space-x-2">
-                      <button 
-                        onClick={() => handleStatusUpdate(item.id, 'verified')}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-[11px] shadow-sm transition"
-                      >
-                        Verify
-                      </button>
-                      <button 
-                        onClick={() => handleStatusUpdate(item.id, 'rejected')}
-                        className="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-xl text-[11px] transition"
-                      >
-                        Reject
-                      </button>
+                    <td className="p-4 text-right">
+                      {item.status === 'verified' ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-600 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                          ✓ Approved & Live
+                        </span>
+                      ) : item.status === 'rejected' ? (
+                        <span className="inline-flex items-center gap-1 text-rose-600 font-bold text-xs bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                          ✕ Rejected
+                        </span>
+                      ) : (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleStatusUpdate(item.id, 'verified')}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition cursor-pointer"
+                          >
+                            Verify
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(item.id, 'rejected')}
+                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs px-3 py-1.5 rounded-lg transition cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
