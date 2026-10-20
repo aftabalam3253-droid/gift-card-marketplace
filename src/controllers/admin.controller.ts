@@ -50,28 +50,29 @@ export const getSellRequests = async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`
       SELECT 
-        id,
-        title,
-        brand,
-        card_number,
-        pin,
-        balance,
-        price,
-        status,
-        seller_id,
-        created_at,
-        is_sold
-      FROM gift_cards
-      ORDER BY id DESC
+        gc.id,
+        gc.title,
+        gc.brand,
+        gc.card_number,
+        gc.pin,
+        gc.balance,
+        gc.price,
+        gc.status,
+        gc.seller_id,
+        gc.created_at,
+        gc.is_sold,
+        u.email as seller_email
+      FROM gift_cards gc
+      LEFT JOIN users u ON gc.seller_id = u.id
+      ORDER BY gc.id DESC
     `);
-    
+
     res.status(200).json(result.rows);
   } catch (err) {
     console.error('Error fetching sell requests:', err);
     res.status(500).json({ error: 'Failed to fetch sell requests' });
   }
 };
-
 // 4. Update Status (Verify or Reject)
 export const updateSellRequestStatus = async (req: Request, res: Response) => {
   const { id } = req.params;
